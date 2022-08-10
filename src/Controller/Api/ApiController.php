@@ -17,9 +17,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+// Sayfa yenilenmeden dataları getirmek için api ucu yazıldı.
 #[Route("/api", name: "front_api_")]
 class ApiController extends AbstractController
 {
+
+    // Sepete ekleme işlemi yapıldı.
     #[Route("/add-to-cart", name: "add_to_cart", methods: ['POST'])]
     public function addToCart(Request $request, ShoppingCartRepository $shoppingCartRepository, ProductRepository $productRepository,UserInterface $user): JsonResponse
     {
@@ -34,6 +37,7 @@ class ApiController extends AbstractController
         return $this->json($shoppingCartRepository->addToCart($postData,$productRepository));
     }
 
+    // Sepeti getirme işlemi yapıldı.
     #[Route("/get-cart-items", name: 'get_cart_items', methods: ['POST'])]
     public function getCartItems(Request $request, ShoppingCartRepository $shoppingCartRepository, UserInterface $user): JsonResponse
     {
@@ -46,6 +50,7 @@ class ApiController extends AbstractController
         return $this->json($shoppingCartRepository->getCartItems($postData));
     }
 
+    // Sepette arttırma, azaltma ve silme işlemi yapıldı.
     #[Route("/cart-item-processor" , name: 'cart_item_processor', methods: ['POST'])]
     public function cartItemProcessor(Request $request, ShoppingCartRepository $shoppingCartRepository, UserInterface $user,ProductRepository $productRepository): JsonResponse
     {
@@ -58,18 +63,7 @@ class ApiController extends AbstractController
         return $this->json($shoppingCartRepository->cartItemProcessor($postData,$productRepository));
     }
 
-//    #[Route("/new-order", name: 'new_order', methods: ['POST'])]
-//    public function newOrder(Request $request, OrderRepository $orderRepository, UserInterface $user,ShoppingCartRepository $shoppingCartRepository,OrderProductRepository $orderProductRepository): JsonResponse
-//    {
-//        $postData = [];
-//        $jsonData = json_decode($request->getContent(), true);
-//        if (!is_null($jsonData)) $postData = $jsonData;
-//        $postData = array_merge($postData, $request->query->all());
-//        /** @var User $user */
-//        $postData['user'] = $user->getId();
-//        return $this->json($orderRepository->newOrder($postData, $shoppingCartRepository,  $orderProductRepository));
-//    }
-
+    // Kategorileri getirme işlemi yapıldı.
     #[Route("/get-categories",name: 'get_categories', methods: ['POST'])]
     public function getCategories(Request $request,CategoryRepository $categoryRepository): JsonResponse
     {
@@ -80,6 +74,7 @@ class ApiController extends AbstractController
         return $this->json($categoryRepository->getCategories($postData));
     }
 
+    // Ürünleri getirme işlemi yapıldı.
     #[Route("/get-products",name: 'get_products', methods: ['POST'])]
     public function getProducts(Request $request,ProductRepository $productRepository,PaginatorInterface $paginator): JsonResponse
     {

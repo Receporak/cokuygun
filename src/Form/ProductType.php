@@ -35,6 +35,7 @@ class ProductType extends AbstractType
                     ])
                 ],
             ])
+            // Görselin değişip değişmediğini anlamak için hidden input kullanıldı.
             ->add('oldImage',HiddenType::class, [
                 'mapped' => false,
                 'required' => false,

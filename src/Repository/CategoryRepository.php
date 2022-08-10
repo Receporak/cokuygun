@@ -107,15 +107,17 @@ class CategoryRepository extends ServiceEntityRepository
      */
     public function getAllCategoryForSelect(array $postData): array
     {
-        $result = ["success" => false, "message" => "No action taken", "errorMessage" => null, "data" => [],"formTypeData"=>[]];
+        $result = ["isSuccess" => false, "message" => "No action taken", "errorMessage" => null, "data" => [],"formTypeData"=>[]];
         $em = $this->getEntityManager();
         try {
+            // Tüm ana kategorileri çekiyoruz.
             $mainCategories = $this->createQueryBuilder("c");
             $mainCategories
                 ->select('c.id',"c.name as label")
                 ->where("c.parent IS NULL");
             $mainCategories = $mainCategories->getQuery()->getArrayResult();
 
+            // Sıralı ve bağlantılı bir şekilde getirmek için kategorileri çekiyoruz.
             $query = $this->createQueryBuilder("c");
             $query
                 ->select('c.id',"c.name as label","c.orderNo");
@@ -123,6 +125,8 @@ class CategoryRepository extends ServiceEntityRepository
             $res = $query->getQuery()->getArrayResult();
             $resCount = count($res);
             $rawQueryString = "";
+
+            // Tüm kategorileri ana kategorilerine bağlı olarak sıralı bir şekilde getiriyoruz.
             if ($resCount > 0) {
                 $rawQueryString = "
                     SELECT
@@ -196,6 +200,7 @@ class CategoryRepository extends ServiceEntityRepository
                 $categoryQueryResult = json_decode($categoryQueryResult[0]["categoryList"], true);
                 $orderedData = [];
 
+                // Kategori listesini öncelikleri girilen sıraya göre getirmek için orderNo değerlerine göre sıralıyoruz.
                 foreach ($categoryQueryResult as $row) {
                     foreach ($row as $key => $value){
                         if ($key == "orderNo") {
@@ -203,17 +208,18 @@ class CategoryRepository extends ServiceEntityRepository
                         }
                     }
                 }
-
+                // Kategori listesini sıralıyoruz.
                 array_multisort($orderedData, SORT_ASC,$categoryQueryResult);
                 $categoryList = [];
 
+                // Ana kategorileri de sıraladığımız kategoriler listesine ekliyoruz.
                 foreach ($mainCategories as $data) {
                     $categoryList[$data["label"]] = $this->find($data["id"]);
                 }
                 foreach ($categoryQueryResult as $data) {
                     $categoryList[$data["label"]] = $this->find($data["id"]);
                 }
-
+                // düzenleme işlemlerinde kategoriyi kendisine bağlamaması için düzenlenen kategoriyi listeden kaldırıyoruz.
                 if (isset($postData["deniedCategoryId"])){
                     $categoryList= array_filter($categoryList, function ($item) use ($postData) {
                         return $postData["deniedCategoryId"] != $item->getId();
@@ -221,19 +227,18 @@ class CategoryRepository extends ServiceEntityRepository
                 }
 
 
-                $result["success"] = true;
+                $result["isSuccess"] = true;
                 $result["message"] = "Success";
                 $result["data"] = $categoryQueryResult;
                 $result["formTypeData"] = $categoryList;
             } else {
-                $result["success"] = false;
+                $result["isSuccess"] = false;
                 $result["message"] = "Query String Not Found";
                 $result["errorMessage"] = "somethingWentWrong";
                 $result["data"] = [];
             }
         } catch (\Exception $exception) {
-            dd($exception->getMessage());
-            $result["success"] = false;
+            $result["isSuccess"] = false;
             $result["message"] = $exception->getMessage();
             $result["errorMessage"] = "somethingWentWrong";
             $result["data"] = [];

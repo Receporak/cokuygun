@@ -23,6 +23,7 @@
                 checkSelectedCategory: function (categoryId) {
                     return this.selectedCategory === categoryId ? 'color:blue' : '';
                 },
+                // Seçili kategoriye göre ürünleri listele
                 getCategoryProduct: function (categoryId) {
                     let _this = this;
                     _this.selectedCategory = categoryId;
@@ -46,6 +47,7 @@
                         })
                     }, 100);
                 },
+                // Seçilen kategorilerin alt kategorilerini listele
                 getCategoryChild: function (categoryId) {
                     let _this = this;
                     // _this.selectedCategory = categoryId;
@@ -77,6 +79,7 @@
                         })
                     }, 100);
                 },
+                // Sepete ekle
                 addToCart: function (productId) {
                     let _this = this;
                     setTimeout(function () {
@@ -99,6 +102,7 @@
                         })
                     }, 100);
                 },
+                // Bu ürün sepette mevcut mu? Sepete ekle butonu yerine arttırma azaltma butonu göstermek için.
                 isInShoppingCart: function (productId) {
                     let _this = this;
                     let res = null
@@ -109,6 +113,7 @@
                     });
                     return res;
                 },
+                // Sepetten arttırma, azaltma ve silme
                 cartItemProcessor: function (productId, action) {
                     let _this = this;
                     let cartItem = _this.isInShoppingCart(productId);
@@ -132,7 +137,11 @@
                                     } else {
                                         _this.shoppingCart = data.data;
                                     }
-                                    _this.pageRefresher++;
+                                }else{
+                                    // Eğer stoktan fazla ürün sepete eklenmeye çalışılırsa, uyarı ver
+                                    if (data.noStock) {
+                                        alert("Stokta yeterli ürün yok");
+                                    }
                                 }
                             },
                             error: function (data) {
@@ -216,14 +225,13 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
-                    <div class="product__pagination" v-show="productList.length>0">
-                        <a href="#">1</a>
-                        <a href="#">2</a>
-                        <a href="#">3</a>
-                        <a href="#"><i class="fa fa-long-arrow-right"></i></a>
-                    </div>
+{#                    <div class="product__pagination" v-show="productList.length>0">#}
+{#                        <a href="#">1</a>#}
+{#                        <a href="#">2</a>#}
+{#                        <a href="#">3</a>#}
+{#                        <a href="#"><i class="fa fa-long-arrow-right"></i></a>#}
+{#                    </div>#}
                 </div>
             </div>
         </div>

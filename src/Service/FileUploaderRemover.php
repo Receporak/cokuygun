@@ -44,10 +44,10 @@ class FileUploaderRemover
      */
     public function deleteImage(string $imageName)
     {
-        $result = ["success"=>false,"message"=>"No action taken"];
+        $result = ["isSuccess"=>false,"message"=>"No action taken"];
         try {
             unlink($this->targetDirectory."/".$imageName);
-            $result["success"] = true;
+            $result["isSuccess"] = true;
         }catch (\Exception $exception){
              $result["message"] = $exception->getMessage();
         }

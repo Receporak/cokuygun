@@ -52,5 +52,7 @@ komutu ile çalıştırabilirsiniz.
  - Ürün oluştururken eğer bir alt kategori seçerseniz o kategorinin üst kategorileri de otomatik olarak ürüne bağlanır.
  - Ürünler oluşturulduktan sonra ürünleri görüntülemek için Front anasayfaya yani http://localhost:7001/ ya da http://127.0.0.1:7001/ 
 eğer symfony server:start ile çalıştırdıysanız http://localhost:8000/ adresinden ürünleri görebilirsiniz.
+ - Tüm ürünleri görüntülemek için anasayfadaki Tümünü Gör butonuna tıklayın.
+ - Ürünlerin alt kategorilerini görüntülemek için açılan ürünler sayfasındaki sol menüdeki ana kategorilere tıklayarak alt kategorilere ulaşabilirsiniz
  - Ürünleri sepete eklemek için giriş yapmanız gerekmektedir.
  - Siparişi tamamlamak için sepet ekranındaki sipariş ver butonuna tıkladıktan sonra adresinizi girerek siparişi tamamlayabilirsiniz.

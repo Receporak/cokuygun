@@ -45,12 +45,12 @@ class ProductRepository extends ServiceEntityRepository
         }
     }
 
-    public function getProducts(array $postData,PaginatorInterface $paginator): array
+    public function getProducts(array $postData, PaginatorInterface $paginator): array
     {
         $result = ["isSuccess" => false, "message" => "No action", "data" => null];
         try {
             $products = $this->createQueryBuilder('p');
-            $products->select('p.id', 'p.name', 'p.description',' p.image','p.price');
+            $products->select('p.id', 'p.name', 'p.description', ' p.image', 'p.price');
             $products->leftJoin('p.category', 'c');
             if (isset($postData["category"]) && $postData["category"] != "") {
                 $products->where('c.id = :category')
@@ -75,12 +75,13 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param array $postData
      * @param Product $product
+     * @param CategoryRepository $categoryRepository
+     * @param FileUploaderRemover $fileUploader
      * @return array
      */
     public function newProduct(array $postData, Product $product, CategoryRepository $categoryRepository, FileUploaderRemover $fileUploader): array
     {
         $result = ["isSuccess" => false, "message" => "No action", "data" => null];
-        $em = $this->getEntityManager();
         try {
 
             if (!isset($postData["category"]) || !is_array($postData["category"])) {
@@ -88,13 +89,15 @@ class ProductRepository extends ServiceEntityRepository
                 return $result;
             }
             foreach ($postData["category"] as $category) {
-                $allParentCategory= $categoryRepository->getMultiMainCategory($category);
+                // Seçili olan kategorileri tüm üst kategorileri ürüne eklenir.
+                $allParentCategory = $categoryRepository->getMultiMainCategory($category);
                 foreach ($allParentCategory as $parentCategory) {
                     $product->addCategory($categoryRepository->find($parentCategory["id"]));
                 }
             }
+            // Ürüne ait görsel sisteme yüklenir.
             if ($postData["image"] != "") {
-                $imageFile=$fileUploader->upload($postData["image"]);
+                $imageFile = $fileUploader->upload($postData["image"]);
                 if ($imageFile["isSuccess"]) {
                     $product->setImage($imageFile["data"]);
                 } else {
@@ -104,7 +107,7 @@ class ProductRepository extends ServiceEntityRepository
             }
             try {
                 $this->add($product, true);
-            }catch (\Exception $e){
+            } catch (\Exception $e) {
                 $result["message"] = $e->getMessage();
                 return $result;
             }
@@ -119,35 +122,39 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param array $postData
      * @param Product $product
+     * @param CategoryRepository $categoryRepository
+     * @param FileUploaderRemover $fileUploader
      * @return array
      */
     public function updateProduct(array $postData, Product $product, CategoryRepository $categoryRepository, FileUploaderRemover $fileUploader): array
     {
         $result = ["isSuccess" => false, "message" => "No action", "data" => null];
-        $em = $this->getEntityManager();
         try {
 
             if (!isset($postData["category"]) || !is_array($postData["category"])) {
                 $result["message"] = "Category is required";
                 return $result;
             }
+            // Eğer ürünün kategorileri değiştirilmişse, ürünün kategorileri silinir.
             foreach ($product->getCategory()->toArray() as $category) {
                 $product->removeCategory($category);
             }
+
+            // Seçili olan kategorileri tüm üst kategorileri ürüne eklenir.
             foreach ($postData["category"] as $category) {
-                $allParentCategory= $categoryRepository->getMultiMainCategory($category);
+                $allParentCategory = $categoryRepository->getMultiMainCategory($category);
                 foreach ($allParentCategory as $parentCategory) {
                     $product->addCategory($categoryRepository->find($parentCategory['id']));
                 }
             }
             if ($postData["image"] != "") {
-                $imageFile=$fileUploader->upload($postData["image"]);
+                $imageFile = $fileUploader->upload($postData["image"]);
                 if ($imageFile["isSuccess"]) {
                     $product->setImage($imageFile["data"]);
                     if ($postData["oldImage"] != "") {
                         try {
                             $fileUploader->deleteImage($postData["oldImage"]);
-                        }catch (\Exception $e){
+                        } catch (\Exception $e) {
                         }
                     }
                 } else {
@@ -173,6 +180,7 @@ class ProductRepository extends ServiceEntityRepository
     {
         $result = ["isSuccess" => false, "message" => "No action", "data" => null];
         try {
+            // Ürün indirimli mi?
             $discountCheckQuery = $this->createQueryBuilder('p')
                 ->select('p.id')
                 ->leftJoin('p.category', 'c')

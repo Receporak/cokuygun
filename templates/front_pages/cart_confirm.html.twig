@@ -9,7 +9,6 @@
             data: {
                 shoppingCart:{{ shoppingCart|raw }},
                 amount:{{ amount|raw }},
-                pageRefresher:0
             },
             methods: {
                 formSubmit:function () {
@@ -21,6 +20,7 @@
             created() {
                 let _this = this;
                 $(document).ready(function () {
+                    // Alanlar dolu mu diye kontrol ediyoruz.
                     $("#address_form").submit(function (e) {
                         var $myForm = $('#address_form');
                         if (!$myForm[0].checkValidity()) {

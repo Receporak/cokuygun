@@ -112,6 +112,7 @@ class ShoppingCartRepository extends ServiceEntityRepository
             $cartItem
                 ->select("sc.id,sc.quantity", "sc.isDiscounted", "sc.hasCampaignDiscount")
                 ->addSelect("p.id as productId,p.name as productName,p.price as productPrice")
+                // Sipariş edilen ürünlerde kampanya kullanılmışsa, kampanya indirimini hesapla
                 ->addSelect("ifelse(sc.hasCampaignDiscount=true,
                                             ifelse(sc.isDiscounted=true,
                                                 ROUND(((sc.quantity-1)*p.price)-(p.price/2),2),
@@ -188,7 +189,7 @@ class ShoppingCartRepository extends ServiceEntityRepository
      */
     public function cartItemProcessor(array $postData, ProductRepository $productRepository): array
     {
-        $result = ["isSuccess" => false, "message" => "No action taken", "data" => []];
+        $result = ["isSuccess" => false, "message" => "No action taken", "data" => [],"noStock"=>false];
         $em = $this->getEntityManager();
         try {
             $owner = $em->find(User::class, (int)$postData["user"]);
@@ -202,11 +203,14 @@ class ShoppingCartRepository extends ServiceEntityRepository
                         switch ($postData["action"]) {
                             // ürün adet arttırma işlemi
                             case "increase":
+                                // Ürün stok kontrolü
                                 if ($cartItem->getQuantity() == $cartItem->getProduct()->getStock()) {
                                     $result["message"] = "Ürün stok yetersiz";
+                                    $result["noStock"] = true;
                                     return $result;
                                 } else {
                                     if ($cartItem->getQuantity() == 2) {
+                                        // Ürün kampanyası var mı?
                                         $campaignCheck = $productRepository->discountCheck($cartItem->getProduct()->getId());
                                         if ($campaignCheck["isSuccess"]) {
                                             $cartItem->setQuantity($cartItem->getQuantity() + 2)
@@ -222,6 +226,7 @@ class ShoppingCartRepository extends ServiceEntityRepository
                             // ürün adet azaltma işlemi
                             case "decrease":
                                 if ($cartItem->getQuantity() > 1) {
+                                    // Ürün kampanyası varsa ve ürün 4 adet ise azaltma işleminde 2 adet azaltılır. Bedava verilen ürün silinir.
                                     if ($cartItem->isHasCampaignDiscount() && $cartItem->getQuantity() == 4) {
                                         $cartItem->setQuantity($cartItem->getQuantity() - 2)
                                             ->setHasCampaignDiscount(false);
@@ -230,7 +235,9 @@ class ShoppingCartRepository extends ServiceEntityRepository
                                     }
                                 } elseif ($cartItem->getQuantity() == 1) {
                                     $this->remove($cartItem, true);
+                                    // Sepetteki ürün adeti kontrol edilerek 2.ürüne indirim yapılır.
                                     $this->setDiscountToCartItem($owner->getId());
+                                    // Sepet toplamı kontrol edilir.
                                     $result["amount"] = $this->cartTotalAmount(["user" => $owner->getId()])["data"];
                                     $result["isSuccess"] = true;
                                     $result["message"] = "Action taken";
@@ -240,9 +247,10 @@ class ShoppingCartRepository extends ServiceEntityRepository
                             // ürün silme işlemi
                             case "remove":
                                 $this->remove($cartItem, true);
+                                // Sepetteki ürün adeti kontrol edilerek 2.ürüne indirim yapılır.
                                 $this->setDiscountToCartItem($owner->getId());
+                                // Sepet toplamı kontrol edilir.
                                 $result["amount"] = $this->cartTotalAmount(["user" => $owner->getId()])["data"];
-
                                 $result["isSuccess"] = true;
                                 $result["message"] = "Action taken";
                                 return $result;
@@ -251,6 +259,7 @@ class ShoppingCartRepository extends ServiceEntityRepository
                                 break;
                         }
                         $this->add($cartItem, true);
+                        // Sepetteki ürün adeti kontrol edilerek 2.ürüne indirim yapılır.
                         $this->setDiscountToCartItem($owner->getId());
                     }
                 }
@@ -258,7 +267,9 @@ class ShoppingCartRepository extends ServiceEntityRepository
 
             $result["isSuccess"] = true;
             $result["message"] = "Action taken";
+            // Sepetteki arttırma azaltma işlemlerinde tüm sepet ürünlerinde değişiklik olabileceği için tümü tekrar çekilir.
             $result["data"] = $this->getCartItems(["user" => $owner->getId()])["data"];
+            // Sepet toplamı kontrol edilir.
             $result["amount"] = $this->cartTotalAmount(["user" => $owner->getId()])["data"];
         } catch (\Exception $e) {
             $result["message"] = $e->getMessage();
@@ -274,12 +285,14 @@ class ShoppingCartRepository extends ServiceEntityRepository
     {
         $shoppingCartItems = $this->getCartItems(["user" => $userId])["data"];
         if (count($shoppingCartItems) > 0 && array_values($shoppingCartItems)[0]["totalQuantity"] > 1) {
-            //TODO: 2.ürüne indirim uygulama kontrolü
+            // Sepetteki en düşük fiyat ürün bulunur.
             $minPriceItem = $this->findMinPriceItemInArray($shoppingCartItems);
             try {
+                // Eğer en düşük fiyatlı ürün bulunan ürün ise indirim yapılmayacaktır.
                 if (!$minPriceItem["isDiscounted"]) {
                     $discountedShoppingCartItem = $this->find($minPriceItem["id"]);
                     if ($discountedShoppingCartItem) {
+                        // Tüm sepet ürünlerinde indirim silinir.
                         $queryRes = $this->createQueryBuilder("sc")
                             ->update()
                             ->set("sc.isDiscounted", ":isDiscounted")
@@ -288,6 +301,7 @@ class ShoppingCartRepository extends ServiceEntityRepository
                             ->setParameter("isDiscounted", false)
                             ->getQuery()
                             ->execute();
+                        // En düşük fiyatlı ürünün indirimi yapılır.
                         $discountedShoppingCartItem->setIsDiscounted(true);
                         $this->add($discountedShoppingCartItem, true);
                     }
@@ -307,12 +321,12 @@ class ShoppingCartRepository extends ServiceEntityRepository
     public function cartTotalAmount(array $postData): array
     {
         $result = ["isSuccess" => false, "message" => "No action taken", "data" => []];
-        $em = $this->getEntityManager();
         try {
             $shoppingCartItems = $this->getCartItems(["user" => $postData["user"]])["data"];
             $subTotalAmount = 0;
             $totalAmount = 0;
             $discountAmount = 0;
+            // Sepetteki ürünlerin toplam fiyatı hesaplanır.
             if (count($shoppingCartItems) > 0) {
                 foreach ($shoppingCartItems as $shoppingCartItem) {
                     $subTotalAmount += $shoppingCartItem["withoutDiscountTotalPrice"];
@@ -324,11 +338,13 @@ class ShoppingCartRepository extends ServiceEntityRepository
 
             $result["isSuccess"] = true;
             $result["message"] = "Action taken";
+            // Hesaplamalardaki değerler '.' dan sonra 2 basamaklı yapılır.
             $result["data"] = [
                 "subTotalAmount" => number_format($subTotalAmount,2),
                 "discountAmount" => number_format($discountAmount,2),
                 "totalAmount" => number_format($totalAmount,2),
             ];
+
         } catch (\Exception $e) {
             $result["message"] = $e->getMessage();
         }

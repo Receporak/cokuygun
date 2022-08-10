@@ -35,6 +35,7 @@ class OrderController extends AbstractController
     #[Route('/{id}/edit', name: 'order_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Order $order, OrderRepository $orderRepository,OrderProductRepository $orderProductRepository): Response
     {
+        // Siparişler listelenir.
         $orderProducts=$orderProductRepository->getOrderProducts([
             'order' => $order->getId()
         ]);
@@ -46,7 +47,6 @@ class OrderController extends AbstractController
 
             return $this->redirectToRoute('order_index', [], Response::HTTP_SEE_OTHER);
         }
-//        dd($orderProducts);
         return $this->renderForm('order/edit.html.twig', [
             'order' => $order,
             'form' => $form,

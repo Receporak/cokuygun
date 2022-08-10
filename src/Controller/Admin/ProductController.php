@@ -28,17 +28,23 @@ class ProductController extends AbstractController
     #[Route('/new', name: 'product_new', methods: ['GET', 'POST'])]
     public function new(Request $request, ProductRepository $productRepository, CategoryRepository $categoryRepository, FileUploaderRemover $fileUploader): Response
     {
+        // Kategorileri ana kategorilerine bağlı olacak şekilde listleme fonksiyonu
         $categoryList= $categoryRepository->getAllCategoryForSelect([]);
         $product = new Product();
+        // Listelenen kategorileri forma gönderme
         $product->categoryList = $categoryList["formTypeData"];
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Ürünlerin resimlerini ve bilgilerini birleştirme işlemi
             $postData=[];
             $postData = array_merge($postData, $request->request->all()["product"]);
             $postData = array_merge($postData, $request->files->all()["product"]);
-            $productRepository->newProduct($postData,$product,$categoryRepository,$fileUploader);
+            $productRes= $productRepository->newProduct($postData,$product,$categoryRepository,$fileUploader);
+            if (!$productRes["isSuccess"]) {
+                $this->addFlash("error", "Ürün oluşturma işlemi başarısız oldu. Hata: " . $productRes["message"]);
+            }
             return $this->redirectToRoute('product_index', [], Response::HTTP_SEE_OTHER);
         }
         return $this->renderForm('product/new.html.twig', [
@@ -60,17 +66,24 @@ class ProductController extends AbstractController
     {
         $categoryList= $categoryRepository->getAllCategoryForSelect([]);
         $product->categoryList = $categoryList["formTypeData"];
+        // Eğer güncelleme ise ürünün görselini kontrol etmek için bir kontrol eklendi
         $product->isUpdate = true;
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
+
         if ($request->isMethod("GET")){
+             // Hidden alana önceki görsel bilgisi eklendi.
             $form->get("oldImage")->setData($product->getImage());
         }
         if ($form->isSubmitted() && $form->isValid()) {
+            // Ürünlerin resimlerini ve bilgilerini birleştirme işlemi
             $postData=[];
             $postData = array_merge($postData, $request->request->all()["product"]);
             $postData = array_merge($postData, $request->files->all()["product"]);
-            $productRepository->updateProduct($postData,$product,$categoryRepository,$fileUploader);
+            $productRes= $productRepository->updateProduct($postData,$product,$categoryRepository,$fileUploader);
+            if (!$productRes["isSuccess"]) {
+                $this->addFlash("error", "Ürün güncelleme işlemi başarısız oldu. Hata: " . $productRes["message"]);
+            }
             return $this->redirectToRoute('product_index', [], Response::HTTP_SEE_OTHER);
         }
         return $this->renderForm('product/edit.html.twig', [

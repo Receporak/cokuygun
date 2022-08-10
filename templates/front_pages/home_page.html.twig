@@ -14,6 +14,7 @@
                 shoppingCart: {{ shoppingCart|raw }},
             },
             methods: {
+                // Seçili kategoriye göre ürünleri listele
                 getCategoryProduct: function (categoryId) {
                     let _this = this;
                     _this.selectedCategory = categoryId;
@@ -37,6 +38,7 @@
                         })
                     }, 100);
                 },
+                // Sepete ekle
                 addToCart: function (productId) {
                     let _this = this;
                     setTimeout(function () {
@@ -59,6 +61,7 @@
                         })
                     }, 100);
                 },
+                // Bu ürün sepette mevcut mu? Sepete ekle butonu yerine arttırma azaltma butonu göstermek için.
                 isInShoppingCart: function (productId) {
                     let _this = this;
                     let res = null
@@ -69,6 +72,7 @@
                     });
                     return res;
                 },
+                // Sepetten arttırma, azaltma ve silme
                 cartItemProcessor: function (productId, action) {
                     let _this = this;
                     let cartItem = _this.isInShoppingCart(productId);
@@ -83,7 +87,6 @@
                             data: JSON.stringify({"productId": productId, "action": action}),
                             success: function (data) {
                                 if (data.isSuccess) {
-                                    console.log(data.data);
                                     if (action === "decrease") {
                                         if (data.data==null) {
                                             delete _this.shoppingCart[cartItem.id];
@@ -93,7 +96,11 @@
                                     } else {
                                         _this.shoppingCart = data.data;
                                     }
-                                    _this.pageRefresher++;
+                                }else{
+                                    // Eğer stoktan fazla ürün sepete eklenmeye çalışılırsa, uyarı ver
+                                    if (data.noStock) {
+                                        alert("Stokta yeterli ürün yok");
+                                    }
                                 }
                             },
                             error: function (data) {
@@ -140,6 +147,7 @@
                         <div class="featured__item__text">
                             <h6><a href="#">${product.name} </a></h6>
                             <h5>${product.price} ₺</h5>
+                            {#                            Eğer kullanıcı sisteme giriş yapmamış ise giriş yapılması gerekir.            #}
                             {% if app.user is null %}
                                 <a class="btn btn-secondary mt-1" href="{{ path('app_login') }}">Sepete Ekle</a>
                             {% else %}

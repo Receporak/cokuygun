@@ -42,7 +42,7 @@ class OrderProductRepository extends ServiceEntityRepository
         }
     }
 
-    public function newOrderProducts(array $postData, ShoppingCartRepository $shoppingCartRepository)
+    public function newOrderProducts(array $postData, ShoppingCartRepository $shoppingCartRepository): array
     {
         $result = ["isSuccess" => false, "message" => "No action taken", "data" => []];
         $em = $this->getEntityManager();
@@ -50,6 +50,7 @@ class OrderProductRepository extends ServiceEntityRepository
             /** @var User $owner */
             $owner = $postData["user"];
             if ($owner) {
+                // Sepettteki ürünler getirilerek orderProduct tablosuna eklenir.
             $shoppingCartList = $shoppingCartRepository->getCartItems(["user" => $owner->getId()]);
                 if ($shoppingCartList["isSuccess"] && count($shoppingCartList["data"]) > 0) {
                     foreach ($shoppingCartList["data"] as $shoppingCart) {
@@ -63,7 +64,6 @@ class OrderProductRepository extends ServiceEntityRepository
                             ->setQuantity((int)$shoppingCart["quantity"]);
                         $this->add($orderProduct);
                     }
-
                 } else {
                     $result["message"] = "No products found in shopping cart";
                     return $result;
@@ -72,7 +72,6 @@ class OrderProductRepository extends ServiceEntityRepository
                 $result["message"] = "User not found";
                 return $result;
             }
-
             $result["isSuccess"] = true;
             $result["message"] = "Order products added successfully";
             $result["data"] = [];
@@ -82,14 +81,14 @@ class OrderProductRepository extends ServiceEntityRepository
         return $result;
     }
 
-    public function getOrderProducts(array $postData)
+    public function getOrderProducts(array $postData): array
     {
         $result = ["isSuccess" => false, "message" => "No action taken", "data" => []];
-        $em = $this->getEntityManager();
         try {
             $orderProducts = $this->createQueryBuilder("op")
                 ->select("op.id", "op.quantity", "op.unitPrice", "op.hasCampaignDiscount", "op.hasDiscount")
                 ->addSelect("p.name")
+                // Sipariş edilen ürünlerde kampanya kullanılmışsa, kampanya indirimini hesapla
                 ->addSelect("ifelse(op.hasCampaignDiscount=true,
                                             ifelse(op.hasDiscount=true,
                                                 ROUND(((op.quantity-1)*op.unitPrice)-(op.unitPrice/2),2),
@@ -119,28 +118,4 @@ class OrderProductRepository extends ServiceEntityRepository
         }
         return $result;
     }
-//    /**
-//     * @return OrderProduct[] Returns an array of OrderProduct objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('o.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?OrderProduct
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

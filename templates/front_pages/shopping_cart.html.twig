@@ -13,6 +13,7 @@
                 pageRefresher:0
             },
             methods: {
+                // Sepetten arttırma, azaltma ve silme
                 cartItemProcessor: function (productId, index, action) {
                     let _this = this;
                     setTimeout(function () {
@@ -39,6 +40,10 @@
                                         _this.shoppingCart = data.data;
                                     }
                                     _this.pageRefresher++;
+                                } else{
+                                    if (data.noStock) {
+                                        alert("Stokta yeterli ürün yok");
+                                    }
                                 }
                             },
                             error: function (data) {
@@ -47,26 +52,6 @@
                         })
                     }, 100);
                 },
-                makeOrder:function () {
-                    let _this = this;
-                    setTimeout(function () {
-                        $.ajax({
-                            url: "{{ path('front_api_cart_item_processor') }}",
-                            method: "POST",
-                            headers: {
-                                'accept': "application/json",
-                                'Content-Type': "application/json",
-                            },
-                            data: JSON.stringify({"productId": productId, "action": action}),
-                            success: function (data) {
-
-                            },
-                            error: function (data) {
-                                return false
-                            }
-                        })
-                    }, 100);
-                }
             },
             computed: {},
             watch: {},
