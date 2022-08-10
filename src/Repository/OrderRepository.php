@@ -59,7 +59,7 @@ class OrderRepository extends ServiceEntityRepository
                         ->setOrderState($em->find(OrderState::class, 1))
                         ->setAddress($postData["address"])
                         ->setCode($this->recursiveOrder())
-                        ->setPaidPrice((float)$postData["totalAmount"])
+                        ->setPaidPrice((float)str_replace(",", ".", $postData["totalAmount"]))
                         ->setDiscountAmount(isset($postData["discountAmount"]) ? (float)$postData["discountAmount"] : 0)
                         ->setCreatedAt(new \DateTime())
                         ->setUpdatedAt(new \DateTime());
