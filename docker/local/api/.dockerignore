@@ -1,0 +1,81 @@
+###> editor ###
+.idea
+.git
+###< editor  ###
+
+###> symfony-framework ###
+var
+vendor
+!/public/assets/uploads/README.md
+/public/assets/uploads/original/*
+!/public/assets/uploads/original/README.md
+/public/assets/uploads/small/*
+!/public/assets/uploads/small/README.md
+/public/assets/uploads/square/*
+!/public/assets/uploads/square/README.md
+/public/assets/uploads/thumb/*
+!/public/assets/uploads/thumb/README.md
+/public/assets/uploads/tiny/*
+!/public/assets/uploads/tiny/README.md
+/public/assets/uploads/other-files/*
+!/public/assets/uploads/other-files/README.md
+
+!public/assets/uploads/images/README.md
+public/assets/uploads/images/*
+!public/assets/uploads/images/original/README.md
+public/assets/uploads/images/original/*
+!public/assets/uploads/images/small/README.md
+public/assets/uploads/images/small/*
+!public/assets/uploads/images/middle/README.md
+public/assets/uploads/images/middle/*
+!public/assets/uploads/images/square/README.md
+public/assets/uploads/images/square/*
+!public/assets/uploads/images/tiny/README.md
+public/assets/uploads/images/tiny/*
+!public/assets/uploads/images/thumb/README.md
+public/assets/uploads/images/thumb/*
+
+!public/logs/README.md
+public/logs/*
+
+symfony.lock
+.env
+.env.test
+composer.lock
+###< symfony-framework ###
+
+###> docker ###
+!docker/local/api/env/.env
+!docker/local/api/env/.env.test
+!docker/dev/api/env/.env
+!docker/dev/api/env/.env.test
+!docker/prod/api/env/.env
+!docker/prod/api/env/.env.test
+###< docker ###
+
+###> friendsofphp/php-cs-fixer ###
+.php_cs
+.php_cs.cache
+###< friendsofphp/php-cs-fixer ###
+
+###> phpunit/phpunit ###
+.phpunit
+phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
+
+###> symfony/web-server-bundle ###
+.web-server-pid
+###< symfony/web-server-bundle ###
+
+###> symfony/webpack-encore-bundle ###
+node_modules
+!public/assets/themes/eliteadmin/assets/node_modules
+public/build
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###
+
+###> liip/imagine-bundle ###
+public/media/cache
+###< liip/imagine-bundle ###

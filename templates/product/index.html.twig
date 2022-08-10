@@ -1,0 +1,46 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Ürün listesi{% endblock %}
+
+{% block body %}
+    <div class="col-sm-12" id="pageTitleDiv">
+        <div class="col-sm-6">
+            <h1>Ürünler</h1>
+        </div>
+        <div class="col-sm-6">
+            <a class="btn btn-success" href="{{ path('product_new') }}">Yeni oluştur</a>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Ad</th>
+                <th>Açıklama</th>
+                <th>Fiyat</th>
+                <th>Stok</th>
+                <th>işlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.price }}</td>
+                <td>{{ product.stock }}</td>
+                <td>
+                    <a class="btn btn-warning" href="{{ path('product_edit', {'id': product.id}) }}">Düzenle</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

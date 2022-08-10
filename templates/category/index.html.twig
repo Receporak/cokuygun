@@ -1,0 +1,42 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Kategoriler{% endblock %}
+
+{% block body %}
+    <div class="col-sm-12" id="pageTitleDiv">
+        <div class="col-sm-6">
+            <h1>Kategoriler</h1>
+        </div>
+        <div class="col-sm-6">
+            <a class="btn btn-success" href="{{ path('category_new') }}">Yeni oluştur</a>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+    <thead>
+            <tr>
+                <th>Id</th>
+                <th>Ad</th>
+                <th>Kategori Sırası</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key,category in categories %}
+            <tr>
+                <td>{{ category.id }}</td>
+                <td>{{ key }}</td>
+                <td>{{ category.orderNo }}</td>
+                <td>
+                    <a class="btn btn-warning" href="{{ path('category_edit', {'id': category.id}) }}">Düzenle</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

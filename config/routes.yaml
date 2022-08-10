@@ -1,0 +1,9 @@
+admin:
+  path: /admin
+admin_login:
+  path: /admin-login
+index:
+    path: /
+    controller: App\Controller\HomePageController::index
+api_login_check:
+      path: /api/login_check

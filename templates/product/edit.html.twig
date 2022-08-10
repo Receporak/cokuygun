@@ -1,0 +1,48 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Ürün Düzenle{% endblock %}
+
+{% block customScript %}
+    <script>
+        let pageVue = new Vue({
+            delimiters: ['${', '}'],
+            el: '#page',
+            data: {
+                selectedCategory:{{ selectedCategory|raw }}
+            },
+            methods: {},
+            computed: {},
+            watch: {},
+            created() {
+                let _this = this;
+                $(document).ready(function () {
+                    $(".select2").select2();
+                    let datas=[];
+                    $.each(_this.selectedCategory, function (index, value) {
+                        datas.push(value.id);
+                    });
+                    $("#product_category").val(datas).trigger('change');
+                    $("#product_form").on("submit",function () {
+                        if ($("#product_oldImage").val() != "") {
+                            $("#product_image").removeAttr("required");
+                        }
+                    });
+                })
+            }
+        });
+    </script>
+{% endblock %}
+{% block body %}
+    <div class="col-sm-12" id="pageTitleDiv">
+        <div class="col-sm-6">
+            <h1>Ürün düzenle</h1>
+        </div>
+        <div class="col-sm-6">
+            <a href="{{ path('product_index') }}" class="btn btn-sm btn-dark" id="createNew">Listeye Dön</a>
+        </div>
+    </div>
+    <img src="{{ app.request.baseUrl }}/assets/uploads/{{ product.image }}" alt="" width="200px">
+    {{ include('product/_form.html.twig', {'button_label': 'Güncelle'}) }}
+
+    {{ include('product/_delete_form.html.twig') }}
+{% endblock %}

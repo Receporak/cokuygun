@@ -1,0 +1,67 @@
+version: "3.4"
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/local/nginx/Dockerfile
+    container_name: cokuygun-nginx
+    volumes:
+      - ./public:/var/www/app/public:rw
+    networks:
+      - nt-cokuygun
+    restart: always
+    stdin_open: true
+    tty: true
+    ports:
+      - "7001:80"
+    depends_on:
+      - symfony
+
+  symfony:
+    build:
+      context: .
+      dockerfile: ./docker/local/api/Dockerfile
+    image: cokuygun-api:latest
+    container_name: cokuygun-api
+    networks:
+      - nt-cokuygun
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '3'
+          memory: 3500M
+        reservations:
+          cpus: '2.5'
+          memory: 3000M
+    volumes:
+      - ./config:/var/www/app/config:rw
+      - ./public:/var/www/app/public:rw
+      - ./src:/var/www/app/src:rw
+      - ./templates:/var/www/app/templates:rw
+      - ./translations:/var/www/app/translations:rw
+      - ./tests:/var/www/app/tests:rw
+      - ./docker/local/api/env/.env:/var/www/app/.env:rw
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.4.17
+    container_name: cokuygun-db
+    networks:
+      - nt-cokuygun
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: demodb
+      MYSQL_USER: demo
+      MYSQL_PASSWORD: abc123
+    ports:
+      - "7002:3306"
+
+networks:
+  nt-cokuygun:
+    driver: bridge

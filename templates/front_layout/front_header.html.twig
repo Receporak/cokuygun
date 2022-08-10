@@ -1,0 +1,41 @@
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="header__top__left">
+                        <a href="{{ path('home_page') }}"><img src="{{ asset('assets/images/cokuygunLogo.png') }}" width="150"></a>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="header__top__right">
+                        <div class="">
+                            <div class="row">
+                                {% if app.user %}
+                                    {% if  is_granted('ROLE_ADMIN') %}
+                                    <div class="col">
+                                        <a class="btn btn-dark" href="{{ path('admin_index') }}"><h5 style="color: white">Admin Paneline Git</h5></a>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col">
+                                        <a class="btn btn-info" href="{{ path('shopping_cart') }}"><h5 style="color: white">Sepete Git</h5></a>
+                                    </div>
+                                    <div class="col">
+                                        <a class="btn btn-danger" href="{{ path('app_logout') }}" style="color: white">Çıkış Yap</a>
+                                    </div>
+                                {% else %}
+                                    <div class="col">
+                                        <a class="btn btn-info" href="{{ path('app_login') }}" style="color: white">Giriş Yap</a>
+                                    </div>
+                                    <div class="col">
+                                        <a class="btn btn-success" href="{{ path('app_register') }}" style="color: white">Kayıt Ol</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

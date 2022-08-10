@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    {{ include('admin_layout/meta.html.twig') }} {# TODO: META 'LARINIZI META.HTML 'İN İÇİNE YAZINIZ #}
+    {% block customMeta %}
+        <meta name="description" content="cokuygun.com">
+    {% endblock %}
+    <title>{% block title %}cokuygun.com{% endblock %}</title>
+    {{ include('admin_layout/css.html.twig') }}
+
+    {% block customCss %}{% endblock %}
+</head>
+
+<body class="skin-blue fixed-layout">
+<div class="preloader">
+    <div class="loader">
+        <div class="loader__figure"></div>
+        <p class="loader__label">cokuygun.com</p>
+    </div>
+</div>
+<div id="main-wrapper">
+    <!-- Topbar header  -->
+    {{ include('admin_layout/header.html.twig') }}
+    <!-- Sidebar-->
+    {{ include('admin_layout/sidebar.html.twig') }}
+    <div id="page">
+        <div class="page-wrapper">
+            <div class="container-fluid">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('danger') %}
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {% block content %}{% endblock %}
+                {% block body %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        © 2022 cokuygun.com
+    </footer>
+</div>
+{% block javascripts %}
+    {{ include('admin_layout/js.html.twig') }}
+
+{% endblock %}
+
+{% block customScript %}{% endblock %}
+</body>
+</html>

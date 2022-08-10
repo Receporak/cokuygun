@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    {{ include('admin_layout/meta.html.twig') }} {# TODO: META 'LARINIZI META.HTML 'İN İÇİNE YAZINIZ #}
+    {% block customMeta %}
+        <meta name="description" content="cokuygun.com">
+    {% endblock %}
+    <title>{% block title %}cokuygun.com{% endblock %}</title>
+    {{ include('front_layout/front_css.html.twig') }}
+
+    {% block customCss %}{% endblock %}
+</head>
+<body>
+<div id="main-wrapper">
+    <div id="page">
+{#        {{ include('front_layout/front_header.html.twig') }}#}
+        {% block body %}
+        {% endblock %}
+    </div>
+</div>
+{% block javascripts %}
+    {{ include('front_layout/front_js.html.twig') }}
+{% endblock %}
+
+{% block customScript %}{% endblock %}
+</body>
+</html>

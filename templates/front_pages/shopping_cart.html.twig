@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sepet{% endblock %}
+
+{% block customScript %}
+    <script>
+        let pageVue = new Vue({
+            delimiters: ['${', '}'],
+            el: '#page',
+            data: {
+                shoppingCart:{{ shoppingCart|raw }},
+                amount:{{ amount|raw }},
+                pageRefresher:0
+            },
+            methods: {
+                cartItemProcessor: function (productId, index, action) {
+                    let _this = this;
+                    setTimeout(function () {
+                        $.ajax({
+                            url: "{{ path('front_api_cart_item_processor') }}",
+                            method: "POST",
+                            headers: {
+                                'accept': "application/json",
+                                'Content-Type': "application/json",
+                            },
+                            data: JSON.stringify({"productId": productId, "action": action}),
+                            success: function (data) {
+                                if (data.isSuccess) {
+                                    _this.amount = data.amount;
+                                    if (action === "decrease") {
+                                        if (data.data.length===0) {
+                                            delete _this.shoppingCart[index];
+                                        } else {
+                                            _this.shoppingCart = data.data;
+                                        }
+                                    }else if(action === "remove"){
+                                        delete _this.shoppingCart[index];
+                                    } else {
+                                        _this.shoppingCart = data.data;
+                                    }
+                                    _this.pageRefresher++;
+                                }
+                            },
+                            error: function (data) {
+                                return false
+                            }
+                        })
+                    }, 100);
+                },
+                makeOrder:function () {
+                    let _this = this;
+                    setTimeout(function () {
+                        $.ajax({
+                            url: "{{ path('front_api_cart_item_processor') }}",
+                            method: "POST",
+                            headers: {
+                                'accept': "application/json",
+                                'Content-Type': "application/json",
+                            },
+                            data: JSON.stringify({"productId": productId, "action": action}),
+                            success: function (data) {
+
+                            },
+                            error: function (data) {
+                                return false
+                            }
+                        })
+                    }, 100);
+                }
+            },
+            computed: {},
+            watch: {},
+            created() {
+                let _this = this;
+                $(document).ready(function () {
+
+                })
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    <section class="shoping-cart spad">
+        <div class="container" v-show="Object.keys(shoppingCart).length>0">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="shoping__cart__table">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th class="shoping__product">Ürün</th>
+                                <th>Birim Fiyat</th>
+                                <th>Adet</th>
+                                <th>Toplam</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in shoppingCart">
+                                <td class="shoping__cart__item">
+                                    <img src="img/cart/cart-1.jpg" alt="">
+                                    <h5>${item.productName}</h5>
+                                    <p style="margin-left: 30px; color: green">${item.hasCampaignDiscount==1?'Kampanyalı ürün, 3 alana 1 bedava':''}</p>
+                                    <p style="margin-left: 30px; color: green">${item.isDiscounted==1?'2.ürüne %50 indirim':''}</p>
+                                </td>
+                                <td class="shoping__cart__price">
+                                    ${item.productPrice} ₺
+                                </td>
+                                <td class="shoping__cart__quantity">
+                                    <div class="quantity">
+                                        <div class="pro-qty">
+                                            <button class="btn btn-sm" @click="cartItemProcessor(item.productId,item.id,'decrease')"><h4>-</h4></button>
+                                            <input type="text" v-model="item.quantity" readonly disabled>
+                                            <button class="btn btn-sm" @click="cartItemProcessor(item.productId,item.id,'increase')"><h5>+</h5></button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="shoping__cart__total">
+                                    ${item.productTotalPrice} ₺
+                                </td>
+                                <td class="shoping__cart__item__close">
+                                    <button class="btn btn-sm" @click="cartItemProcessor(item.productId,item.id,'remove')">Sil</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="shoping__checkout">
+                        <h5>Sepet Toplam Tutar</h5>
+                        <ul>
+                            <li>Ara Toplam <span style="color: black">${ amount.subTotalAmount } ₺</span></li>
+                            <li>İndirim Tutarı <span style="color: green">${ amount.discountAmount } ₺</span></li>
+                            <li>Ödenecek Tutar <span style="color: green">${ amount.totalAmount } ₺</span></li>
+                        </ul>
+                        <a href="{{ path('cart_confirm') }}" class="primary-btn">Sipariş ver</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" v-show="Object.keys(shoppingCart).length==0">
+            <section class="breadcrumb-section set-bg">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="">
+                                <h2>Sepetiniz boş</h2>
+                                <div class="mt-2">
+                                    <span>Alışveriş yapmak için hemen tıklayın</span>
+                                </div>
+                                <div class="mt-2">
+                                    <a class="btn btn-info" href="{{ path('home_page') }}">Alışverişe devam et</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <input type="hidden" v-model="pageRefresher">
+
+    </section>
+{% endblock %}

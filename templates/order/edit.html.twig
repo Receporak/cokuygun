@@ -1,0 +1,42 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Sipariş Düzenle{% endblock %}
+
+{% block body %}
+    <div class="col-sm-12" id="pageTitleDiv">
+        <div class="col-sm-6">
+            <h1>Sipariş Düzenle</h1>
+        </div>
+        <div class="col-sm-6">
+            <a href="{{ path('order_index') }}" class="btn btn-sm btn-dark" id="createNew">Listeye Dön</a>
+        </div>
+    </div>
+    {{ include('order/_form.html.twig', {'button_label': 'Update'}) }}
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Ürün</th>
+                <th>Adet</th>
+                <th>Ara Toplam</th>
+                <th>İndirim Tutarı</th>
+                <th>Toplam</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for product in orderProducts %}
+            <tr>
+                <td><b>{{ product.name }}</b></td>
+                <td>{{ product.quantity }}</td>
+                <td>{{ product.withoutDiscountTotalPrice }} ₺</td>
+                <td>{{ product.withoutDiscountTotalPrice - product.productTotalPrice }} ₺</td>
+                <td>{{ product.productTotalPrice }} ₺</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="row">
+        <div class="col-12" style="text-align: right">
+            <h3> Ödenen Tutar: <b>{{ order.paidPrice }} ₺</b></h3>
+        </div>
+    </div>
+{% endblock %}

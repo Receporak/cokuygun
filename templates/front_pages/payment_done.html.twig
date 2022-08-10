@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sipariş Alındı{% endblock %}
+
+{% block body %}
+    <section>
+        <div class="container">
+            <section class="breadcrumb-section set-bg">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div>
+                                <h2>Siparişiniz alındı. Bizi tercih ettiğiniz için teşekkürler.</h2>
+                                <div class="mt-2">
+                                    <span>Alışveriş yapmak için hemen tıklayın</span>
+                                </div>
+                                <div class="mt-2">
+                                    <a class="btn btn-info" href="{{ path('home_page') }}">Alışveriş Yap</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+{% endblock %}

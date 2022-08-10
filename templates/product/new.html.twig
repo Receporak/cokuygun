@@ -1,0 +1,41 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Yeni Ürün{% endblock %}
+
+{% block customScript %}
+    <script>
+        let pageVue = new Vue({
+            delimiters: ['${', '}'],
+            el: '#page',
+            data: {},
+            methods: {},
+            computed: {},
+            watch: {},
+            created() {
+                let _this = this;
+                $(document).ready(function () {
+                    $(".select2").select2();
+                    $("#product_price").keypress(function (e){
+                        if ((event.which != 46 || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
+                            event.preventDefault();
+                        }
+                    });
+                })
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div class="col-sm-12" id="pageTitleDiv">
+        <div class="col-sm-6">
+            <h1>Yeni Ürün</h1>
+        </div>
+        <div class="col-sm-6">
+            <a href="{{ path('product_index') }}" class="btn btn-sm btn-dark" id="createNew">Listeye Dön</a>
+        </div>
+    </div>
+
+    {{ include('product/_form.html.twig') }}
+
+{% endblock %}

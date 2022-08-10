@@ -1,0 +1,2 @@
+parameters:
+  uploadDirectory: '%kernel.project_dir%/public/assets/uploads'

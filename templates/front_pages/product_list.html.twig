@@ -1,0 +1,231 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ürün Listesi{% endblock %}
+{% block customCss %}
+    <style>
+
+    </style>
+{% endblock %}
+
+{% block customScript %}
+    <script>
+        let pageVue = new Vue({
+            delimiters: ['${', '}'],
+            el: '#page',
+            data: {
+                selectedCategory: '',
+                categoryList: {{ categoryList|raw }},
+                productList: {{ productList|raw }},
+                shoppingCart: {{ shoppingCart|raw }},
+                categoryChildList: {},
+            },
+            methods: {
+                checkSelectedCategory: function (categoryId) {
+                    return this.selectedCategory === categoryId ? 'color:blue' : '';
+                },
+                getCategoryProduct: function (categoryId) {
+                    let _this = this;
+                    _this.selectedCategory = categoryId;
+                    setTimeout(function () {
+                        $.ajax({
+                            url: "{{ path('front_api_get_products') }}",
+                            method: "POST",
+                            headers: {
+                                'accept': "application/json",
+                                'Content-Type': "application/json",
+                            },
+                            data: JSON.stringify({"category": categoryId}),
+                            success: function (data) {
+                                if (data.isSuccess) {
+                                    _this.productList = data.data;
+                                }
+                            },
+                            error: function (data) {
+                                return false
+                            }
+                        })
+                    }, 100);
+                },
+                getCategoryChild: function (categoryId) {
+                    let _this = this;
+                    // _this.selectedCategory = categoryId;
+                    setTimeout(function () {
+                        $.ajax({
+                            url: "{{ path('front_api_get_categories') }}",
+                            method: "POST",
+                            headers: {
+                                'accept': "application/json",
+                                'Content-Type': "application/json",
+                            },
+                            data: JSON.stringify({"id": categoryId}),
+                            success: function (data) {
+                                if (_this.categoryChildList[categoryId] === undefined) {
+                                    _this.categoryChildList[categoryId] = data.data;
+                                    let html = ' <ul style="margin-left: 15px!important;" >';
+                                    for (let i = 0; i < _this.categoryChildList[categoryId].length; i++) {
+                                        html += '<li id="category_' + _this.categoryChildList[categoryId][i].id + '" ><a href="javascript:void(0)" onclick="pageVue.getCategoryChild(' + _this.categoryChildList[categoryId][i].id + ')">' + _this.categoryChildList[categoryId][i].name + '</a></li>';
+                                    }
+                                    html += '</ul>';
+                                    $('#category_' + categoryId).append(html);
+                                }
+                                _this.getCategoryProduct(categoryId);
+
+                            },
+                            error: function (data) {
+                                return false
+                            }
+                        })
+                    }, 100);
+                },
+                addToCart: function (productId) {
+                    let _this = this;
+                    setTimeout(function () {
+                        $.ajax({
+                            url: "{{ path('front_api_add_to_cart') }}",
+                            method: "POST",
+                            headers: {
+                                'accept': "application/json",
+                                'Content-Type': "application/json",
+                            },
+                            data: JSON.stringify({"product": productId}),
+                            success: function (data) {
+                                if (data.isSuccess) {
+                                    _this.shoppingCart = data.data;
+                                }
+                            },
+                            error: function (data) {
+                                return false
+                            }
+                        })
+                    }, 100);
+                },
+                isInShoppingCart: function (productId) {
+                    let _this = this;
+                    let res = null
+                    $.each(_this.shoppingCart, function (index, value) {
+                        if (value.productId === productId) {
+                            res = value;
+                        }
+                    });
+                    return res;
+                },
+                cartItemProcessor: function (productId, action) {
+                    let _this = this;
+                    let cartItem = _this.isInShoppingCart(productId);
+                    setTimeout(function () {
+                        $.ajax({
+                            url: "{{ path('front_api_cart_item_processor') }}",
+                            method: "POST",
+                            headers: {
+                                'accept': "application/json",
+                                'Content-Type': "application/json",
+                            },
+                            data: JSON.stringify({"productId": productId, "action": action}),
+                            success: function (data) {
+                                if (data.isSuccess) {
+                                    if (action === "decrease") {
+                                        if (data.data == null) {
+                                            delete _this.shoppingCart[cartItem.id];
+                                        } else {
+                                            _this.shoppingCart = data.data;
+                                        }
+                                    } else {
+                                        _this.shoppingCart = data.data;
+                                    }
+                                    _this.pageRefresher++;
+                                }
+                            },
+                            error: function (data) {
+                                return false
+                            }
+                        })
+                    }, 100);
+                },
+            },
+            computed: {},
+            watch: {},
+            created() {
+                let _this = this;
+                $(document).ready(function () {
+
+                })
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    <section class="product spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-5">
+                    <div class="sidebar">
+                        <div class="sidebar__item">
+                            <h4>Kategori</h4>
+                            <ul>
+                                <li v-for="item in categoryList" :id="'category_'+item.id"><a href="javascript:void(0)" @click="getCategoryChild(item.id)"> ${item.name} </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-7">
+                    <div class="filter__item">
+                        <div class="row">
+                            <div class="col-lg-12 text-center">
+                                <div class="filter__found">
+                                    <h6><span>${productList.length}</span> Ürün Bulundu</h6>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row" v-show="productList.length==0">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-12 text-center">
+                                    <div class="">
+                                        <h2>Kategoriye ait ürün bulunamadı</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" v-show="productList.length>0">
+                        <div class="col-lg-3 col-md-4 col-sm-6 mix oranges fresh-meat" v-for="product in productList">
+                            <div class="featured__item">
+                                <div class="featured__item__pic">
+                                    <img :src="'{{ app.request.baseUrl }}/assets/uploads/'+product.image" alt="">
+                                </div>
+                                <div class="featured__item__text">
+                                    <h6><a href="#">${product.name}</a></h6>
+                                    <h5>${product.price} ₺</h5>
+                                    {% if app.user is null %}
+                                        <a class="btn btn-secondary mt-1" href="{{ path('app_login') }}">Sepete Ekle</a>
+                                    {% else %}
+                                        <div v-if="isInShoppingCart(product.id)!=null">
+                                            <div class="quantity">
+                                                <div class="pro-qty">
+                                                    <button class="btn btn-sm" @click="cartItemProcessor(product.id,'decrease')"><h4>-</h4></button>
+                                                    <input type="text" v-model="isInShoppingCart(product.id).quantity" readonly disabled>
+                                                    <button class="btn btn-sm" @click="cartItemProcessor(product.id,'increase')"><h5>+</h5></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-secondary mt-1" v-if="isInShoppingCart(product.id)==null" @click="addToCart(product.id)">Sepete Ekle</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="product__pagination" v-show="productList.length>0">
+                        <a href="#">1</a>
+                        <a href="#">2</a>
+                        <a href="#">3</a>
+                        <a href="#"><i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

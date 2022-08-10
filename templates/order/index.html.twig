@@ -1,0 +1,49 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Siparişler{% endblock %}
+
+{% block body %}
+    <div class="col-sm-12" id="pageTitleDiv">
+        <div class="col-sm-6">
+            <h1>Siparişler</h1>
+        </div>
+        <div class="col-sm-6">
+
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Sipariş Kodu</th>
+                <th>Toplam Tutar</th>
+                <th>İndirim Tutarı</th>
+                <th>Ödenen Ücret</th>
+                <th>Adres</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.code }}</td>
+                <td>{{ order.paidPrice+order.discountAmount }} ₺</td>
+                <td>{{ order.discountAmount }} ₺</td>
+                <td>{{ order.paidPrice }} ₺</td>
+                <td>{{ order.address }}</td>
+                <td>{{ order.orderState.name }}</td>
+                <td>
+                    <a class="btn btn-warning" href="{{ path('order_edit', {'id': order.id}) }}">Sipariş İçeriğini Göster / Düzenle</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
