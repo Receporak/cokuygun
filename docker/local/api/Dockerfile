@@ -25,7 +25,7 @@ COPY ./docker/local/api/env/www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY ./docker/local/api/env/php.ini /usr/local/etc/php/php.ini
 
 COPY --from=composerimage /usr/bin/composer /usr/bin/composer
-COPY --from=symfonycorp/cli /symfony /usr/local/bin/symfony
+# COPY --from=symfonycorp/cli /symfony /usr/local/bin/symfony
 
 ################################################################################
 

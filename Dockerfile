@@ -61,7 +61,7 @@ CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
 
 FROM prod AS test
 
-COPY --from=symfonycorp/cli /symfony /usr/local/bin/symfony
+# COPY --from=symfonycorp/cli /symfony /usr/local/bin/symfony
 RUN php bin/console c:c
 
 ################################################################################
